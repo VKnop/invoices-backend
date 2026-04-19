@@ -30,3 +30,14 @@ func (iu *InvoiceUsecase) CreateInvoice(invoice model.Invoice) (model.Invoice, e
 
 	return invoice, nil
 }
+
+func (pu *InvoiceUsecase) EditInvoice(id int, invoice model.Invoice) (model.Invoice, error) {
+
+	invoice, err := pu.repository.EditInvoice(id, invoice)
+
+	if err != nil {
+		return model.Invoice{}, err
+	}
+
+	return invoice, nil
+}

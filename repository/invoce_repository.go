@@ -49,9 +49,8 @@ func (ir *InvoiceRepository) GetInvoices() ([]model.Invoice, error) {
 
 func (ir *InvoiceRepository) CreateInvoice(invoice model.Invoice) (int, error) {
 	var id int
-	query, err := ir.connection.Prepare("INSERT INTO invoices" +
-		"(code, description, balance)" +
-		" VALUES ($1, $2, $3) RETURNING id")
+	query, err := ir.connection.Prepare("INSERT INTO invoices(current_status)" +
+		" VALUES ($1) RETURNING id")
 	if err != nil {
 		fmt.Println(err)
 		return 0, err
@@ -66,4 +65,30 @@ func (ir *InvoiceRepository) CreateInvoice(invoice model.Invoice) (int, error) {
 
 	query.Close()
 	return id, nil
+}
+
+func (ir *InvoiceRepository) EditInvoice(id int, invoice model.Invoice) (model.Invoice, error) {
+
+	query, err := ir.connection.Prepare("UPDATE invoices SET current_status = $1 WHERE id = $2 RETURNING id")
+	if err != nil {
+		fmt.Println(err)
+		return model.Invoice{}, err
+	}
+
+	err = query.QueryRow(invoice.CURRENT_STATUS, id).Scan(&id)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return model.Invoice{}, nil
+		}
+		return model.Invoice{}, err
+	}
+
+	newInvoice := model.Invoice{
+		ID:             id,
+		CURRENT_STATUS: invoice.CURRENT_STATUS}
+
+	query.Close()
+
+	return newInvoice, nil
 }

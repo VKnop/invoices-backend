@@ -34,6 +34,7 @@ func main() {
 
 	service.GET("/invoices", invoiceController.GetInvoices)
 	service.POST("/invoice", invoiceController.CreateInvoice)
+	service.PUT("/invoice/:id", invoiceController.EditInvoice)
 
 	service.Run(":8001")
 }
