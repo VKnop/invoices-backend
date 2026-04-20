@@ -20,32 +20,46 @@ func NewInvoiceController(usecase usecase.InvoiceUsecase) invoiceController {
 }
 
 func (i *invoiceController) GetInvoices(ctx *gin.Context) {
+
 	invoices, err := i.invoiceUseCase.GetInvoices()
+
+	var invoiceResponse []model.InvoiceResponse
+	for i := 0; i < len(invoices); i++ {
+		newInvoice := model.InvoiceResponse{
+			ID:             invoices[i].ID,
+			CURRENT_STATUS: invoices[i].CURRENT_STATUS}
+		invoiceResponse = append(invoiceResponse, newInvoice)
+	}
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, invoices)
+	ctx.JSON(http.StatusOK, invoiceResponse)
 }
 
 func (i *invoiceController) CreateInvoice(ctx *gin.Context) {
 
 	var invoice model.Invoice
 	err := ctx.BindJSON(&invoice)
-
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 		return
 	}
 
 	insertedInvoice, err := i.invoiceUseCase.CreateInvoice(invoice)
+
+	invoiceResponse := model.InvoiceResponse{
+		ID:             insertedInvoice.ID,
+		CURRENT_STATUS: insertedInvoice.CURRENT_STATUS}
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, insertedInvoice)
+	ctx.JSON(http.StatusCreated, invoiceResponse)
 }
 
 func (p *invoiceController) EditInvoice(ctx *gin.Context) {
@@ -69,14 +83,19 @@ func (p *invoiceController) EditInvoice(ctx *gin.Context) {
 
 	changedInvoice, errr := p.invoiceUseCase.EditInvoice(id, invoice)
 
+	invoiceResponse := model.InvoiceResponse{
+		ID:             changedInvoice.ID,
+		CURRENT_STATUS: changedInvoice.CURRENT_STATUS}
+
 	if errr != nil {
 		ctx.JSON(http.StatusInternalServerError, errr)
 		return
 	}
-	if changedInvoice == (model.Invoice{}) {
+
+	if changedInvoice.ID == (0) {
 		ctx.JSON(http.StatusBadRequest, "Nota não existe")
 		return
 	}
 
-	ctx.JSON(http.StatusOK, changedInvoice)
+	ctx.JSON(http.StatusOK, invoiceResponse)
 }

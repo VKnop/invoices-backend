@@ -12,6 +12,7 @@ func (s valid_status) String() string {
 }
 
 type Invoice struct {
-	ID             int    `json:"id"`
-	CURRENT_STATUS string `json:"current_status"`
+	ID             int              `json:"id"`
+	CURRENT_STATUS string           `json:"current_status"`
+	PRODUCTS       []ProductInvoice `json:"products"`
 }
